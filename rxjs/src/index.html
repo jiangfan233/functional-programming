@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <button id="search-button">Search</button>
+    <div id="form" style="display: none">
+      <input type="number" id="textbox" />
+      <button id="close-button">Close</button>
+    </div>
+
+    <script src="https://unpkg.com/rxjs@^7/dist/bundles/rxjs.umd.min.js"></script>
+    <!-- <script src="../rxjs.umd.min.js"></script> -->
+    <script>
+      const {
+        fromEvent,
+        throttleTime,
+        throttle,
+        switchAll,
+        map,
+        delay,
+        switchMapTo,
+        switchMap,
+        take,
+        tap,
+        takeUntil,
+      } = rxjs;
+
+      const div = document.querySelector("#form");
+      const searchButtonClicks = fromEvent(
+        document.querySelector("#search-button"),
+        "click"
+      );
+      const closeButtonClicks = fromEvent(
+        document.querySelector("#close-button"),
+        "click"
+      ).pipe(
+        take(1),
+        // tap: 用于执行副作用
+        tap(() => {
+          div.style.display = "none";
+          textbox.value = "";
+          // 重新订阅搜索事件
+          searchEvents.subscribe(console.log);
+        })
+      );
+
+      const textbox = document.querySelector("#textbox");
+      const nums = fromEvent(textbox, "input");
+
+      const url = "https://jsonplaceholder.typicode.com/todos/";
+
+      const getJson = async (num) => {
+        const res = await fetch(url + num);
+        return await res.json();
+      };
+
+      const numEvents = nums.pipe(
+        // throttleTime: 激活第一次事件，并忽视之后50ms内的事件
+        throttleTime(50),
+        map((e) => getJson(e.target.value)),
+        switchAll()
+      );
+
+      const searchEvents = searchButtonClicks.pipe(
+        take(1),
+        tap(() => {
+          div.style.display = "block";
+        }),
+        switchMap((e) => numEvents),
+        takeUntil(closeButtonClicks)
+      );
+
+      searchEvents.subscribe(console.log);
+    </script>
+  </body>
+</html>
