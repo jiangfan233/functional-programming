@@ -17,7 +17,7 @@ Observable.prototype = {
   },
 
   // 产生新的 Observable
-  map: (projectionFunction) => {
+  map: function (projectionFunction) {
     const self = this;
     return new Observable(function (observer) {
       return self.forEach(
@@ -56,10 +56,10 @@ Observable.prototype = {
     const self = this;
     return new Observable(function (observer) {
       const subscription = self.forEach(
-        function onNext(x) { 
+        function onNext(x) {
           observer.onNext(x);
           counter++;
-          if(counter === num) {
+          if (counter === num) {
             observer.onCompleted();
             subscription.dispose();
           }
@@ -70,19 +70,25 @@ Observable.prototype = {
         function onCompleted() {
           observer.onCompleted();
         }
-      )
+      );
       return subscription;
-    })
-  }
+    });
+  },
 };
 
 Observable.fromEvent = function (dom, eventName) {
   return new Observable(function forEach(observer) {
     const handler = (e) => observer.onNext(e);
     dom.addEventListener(eventName, handler);
-
     return {
-      dispose: dom.removeEventListener(eventName, handler),
+      dispose: () => dom.removeEventListener(eventName, handler),
     };
   });
 };
+
+// document.querySelector("#input").addEventListener("input", console.log)
+const clicks = Observable.fromEvent(document, "click");
+
+clicks.forEach(
+  (x) => console.log(x),
+);
