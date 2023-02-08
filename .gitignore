@@ -1,1 +1,4 @@
 rxjs/rxjs.umd.min.js
+rxjs/node_modules/
+functional-programming/book/node_modules/
+.vscode/launch.json

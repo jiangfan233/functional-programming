@@ -1,4 +1,4 @@
-
+import "./index"
 
 function test_concatMap() {
   var movieLists = [
