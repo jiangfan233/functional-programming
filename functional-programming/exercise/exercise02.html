@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div id="sel" ></div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.6.2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.26.0/ramda.min.js"></script>
+    <script>
+      const { curry, compose, map } = R;
+      const { getJSON } = $;
+
+      const host = "api.flickr.com";
+      const path = "/services/feeds/photos_public.gne";
+
+      const query = (tag) => `?tags=${tag}&format=json&jscallback=?`;
+      const url = (tag) => `https://${host}${path}${query(tag)}`;
+
+      const parseArray = curry((fn, arr) => arr.map(fn));
+      const jsonStringify = curry((x) => JSON.stringify(x, null, 4));
+      const newLine = curry((s) => s + "<br>");
+      const replace = curry((src, target, s) => String(s).replace(src, target));
+      const prop = curry((p, object) => object[p]);
+      // const map = curry((fn, arr) => arr.map(fn));
+
+      const Impure = {
+        getJson: curry((callback, url) => $.getJSON(url)),
+        setHtml: curry((sel, h) => $(sel).html(h)),
+        trace: curry((tag, x) => {
+          console.log(tag, x);
+          return x;
+        }),
+      };
+
+      // const image = curry((url) => `<img src=${url}></img>`);
+      const image = curry((url) => $("<img/>", { src: url }));
+      const images = compose(
+        map(compose(image, prop("m"), prop("media"))),
+        prop("items")
+      );
+      // const images = compose(map(image), mediaUrls);
+      const render = compose(Impure.setHtml("#sel"), images);
+
+      // jsp 调用的函数
+      const jsonFlickrFeed = render;
+
+      const app = compose(
+        Impure.getJson(compose(Impure.getJson(Impure.trace("res")), url)),
+        url
+      );
+      app("cats");
+
+      // Impure.setHtml(document.querySelector("#sel"))("dassda")
+    </script>
+  </body>
+</html>
