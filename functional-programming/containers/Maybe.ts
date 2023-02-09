@@ -15,19 +15,13 @@ export class Maybe<T extends any> extends FunctorClass<T> {
     return this.value === undefined || this.value === null;
   }
 
-  @printRes
   map(fn: Function) {
     return this.isNothing ? this : Maybe.of(fn(this.value));
   }
 
-  chain<K extends unknown>(f: Function): Functor<K> {
-      return this.map(f).join();
-  }
-
   inspect() {
-    return this.isNothing ? "Nothing" : `${Just(this.value)}`;
+    return `${Just(this.isNothing ? "Nothing" : this.value)}`;
   }
-
 }
 
 export const maybe = curry(

@@ -5,7 +5,7 @@ class Container<T extends any> extends FunctorClass<T>{
     super(value);
   }
 
-  @printRes
+  
   map(fn: Function) {
     return Container.of(fn(this.value))
   }
@@ -14,10 +14,7 @@ class Container<T extends any> extends FunctorClass<T>{
     return new Container(x);
   }
 
-  chain<K extends unknown>(fn: Function): Functor<K> {
-    return Container.of(fn(this.value)).join();
-  }
-
+  @printRes
   inspect() {
     if(this.value instanceof FunctorClass) {
       return `ID{ value: ${this.value.inspect()} }`;
